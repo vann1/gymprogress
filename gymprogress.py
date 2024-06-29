@@ -82,20 +82,42 @@ df['Total Tonnage'] = df[['Tonnage1', 'Tonnage2', 'Tonnage3', 'Tonnage4', 'Tonna
 unique_exercises = df['Workouts'].unique()
 exercise_dfs = []
 
-for exercise in unique_exercises:
-    if exercise != "Upper(Pull)":
-        exercise_df = df[df["Workouts"].str.contains(exercise)]   
-        if exercise == "Single arm machine row":
-            exercise_df["Total Tonnage"] = exercise_df["Total Tonnage"] / 5
-        exercise_dfs.append(exercise_df)
+unique_days = df[df['Workouts'].str.contains(r'\w+\(\w+\)')]['Workouts'].unique()
+
+fig, axs = plt.subplots(len(unique_days), 1, figsize=(10, len(unique_days) * 5), sharex=True)
+
+current_day = None
+day_dfs = {day: pd.DataFrame(columns=df.columns) for day in unique_days}
+for index, row in df.iterrows():
+    if row["Workouts"] in unique_days:
+        current_day = row["Workouts"]
+    if current_day:
+        day_dfs[current_day] = pd.concat([day_dfs[current_day], pd.DataFrame([row])], ignore_index=True)
+
+
+for index, day in enumerate(unique_days):
+    day_df = day_dfs[day]
+    for exercise in day_df['Workouts'].unique():
+        if exercise not in unique_days:  # Skip the day names
+            exercise_df = day_df[day_df['Workouts'] == exercise]
+            axs[index].plot(exercise_df['Date'], exercise_df['Total Tonnage'], label=exercise)
+    axs[index].set_title(day)
+    axs[index].legend()
+
+
+
+# for exercise in unique_exercises:
+#     if exercise != "Upper(Pull)" and exercise != "Upper(Push)":
+#         exercise_df = df[df["Workouts"].str.contains(exercise)]   
+#         exercise_dfs.append(exercise_df)
 
 
 
 # Plot for each exercise
 
-for exercise_df in exercise_dfs:
-    if exercise_df["Workouts"].iloc[0] != "":
-        plt.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=exercise_df["Workouts"].iloc[0])
+# for exercise_df in exercise_dfs:
+#     if exercise_df["Workouts"].iloc[0] != "":
+#         plt.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=exercise_df["Workouts"].iloc[0])
 
 plt.legend()
 plt.tight_layout()
