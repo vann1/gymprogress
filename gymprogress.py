@@ -2,7 +2,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import pandas.api.types as ptypes
 
 colors={
     "red": "#FF0000",
@@ -31,7 +31,6 @@ df = pd.DataFrame(data)
 date_format = "%d.%m."
 
 df["Date"] = df["Date"].apply(lambda x: pd.to_datetime(str(x) + ".2024", format=date_format + ".%Y", errors='coerce'))
-# df.sort_values(by='Date', inplace=True)
 
 current_date = None
 
@@ -80,32 +79,24 @@ df['Tonnage5'] = df['Weight2'] * df['W2Set3']
 #Sums up all set's tonnages
 df['Total Tonnage'] = df[['Tonnage1', 'Tonnage2', 'Tonnage3', 'Tonnage4', 'Tonnage5']].sum(axis=1)
 
-#Initializes new dataframe for each exercise
-wide_pullup = df[df["Workouts"].str.contains("Wide")]
-seated_db_ohp = df[df["Workouts"].str.contains("Seated db ohp")]
-singlearm_machinerow = df[df["Workouts"].str.contains("Single arm machine row")]
-db_bench_press = df[df["Workouts"].str.contains("Db bench press")]
-cable_oh_ex = df[df["Workouts"].str.contains("1Cable oh ex")]
-db_side_raises = df[df["Workouts"].str.contains("1Db side raises")]
-alternating_seated_curl = df[df["Workouts"].str.contains("1Alternating seated curls")]
+unique_exercises = df['Workouts'].unique()
+exercise_dfs = []
 
-#Single arm machine row total tonnage divided, because much larger compared to other exercises. Makes the diagram look better.
-singlearm_machinerow["Total Tonnage"] = singlearm_machinerow["Total Tonnage"].apply(lambda x: x / 5)
+for exercise in unique_exercises:
+    if exercise != "Upper(Pull)":
+        exercise_df = df[df["Workouts"].str.contains(exercise)]   
+        if exercise == "Single arm machine row":
+            exercise_df["Total Tonnage"] = exercise_df["Total Tonnage"] / 5
+        exercise_dfs.append(exercise_df)
 
-#Plot style
-plt.style.use('fivethirtyeight')
 
-#Plot for each exercise
-plt.plot(wide_pullup["Date"], wide_pullup["Total Tonnage"], label="Wide Pull Up")
-plt.plot(seated_db_ohp["Date"], seated_db_ohp["Total Tonnage"], label="Seated Overhead Press")
-plt.plot(singlearm_machinerow["Date"], singlearm_machinerow["Total Tonnage"], label="Single Arm Machinerow")
-plt.plot(db_bench_press["Date"], db_bench_press["Total Tonnage"], label="Dumbell Bench Press")
-plt.plot(cable_oh_ex["Date"], cable_oh_ex["Total Tonnage"], label="Cable Overhead Extention")
-plt.plot(db_side_raises["Date"], db_side_raises["Total Tonnage"], label="Side Raises")
-plt.plot(alternating_seated_curl["Date"], alternating_seated_curl["Total Tonnage"], label="Seated Alternating Curl")
 
+# Plot for each exercise
+
+for exercise_df in exercise_dfs:
+    if exercise_df["Workouts"].iloc[0] != "":
+        plt.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=exercise_df["Workouts"].iloc[0])
 
 plt.legend()
 plt.tight_layout()
-
 plt.show()
