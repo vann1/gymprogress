@@ -113,50 +113,61 @@ plt.subplots_adjust(bottom=0.2, left=0.3)
 # Muuttuja aktiiviselle kuvaajalle
 current_day_index = [0]
 
-
-def update_exercise(label):
-    print(label)
+def update_exercise(label, current_day_title):
+    ax.clear()
+    ax.set_title(current_day_title)
     exercise_df = df[df["Workouts"] == label]
     ax.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=label)
+    ax.xaxis.set_major_locator(plt.MaxNLocator(5))
     plt.draw()
-    
+
+#Initializes radio buttons
+current_radio_buttons = None 
 
 def update_day(index):
-
+    global current_radio_buttons
+    #List of day_dfs dictionary keys
     keys = list(day_dfs.keys())
+    #Clears axes
     ax.clear()
+
+    #Initialize a dataframe that contains all exercises for that specific day
     day = day_dfs[keys[index]]
+
+    #List of all specific exercises from that specific day
     day_unique_exercises = day["Workouts"].unique()
-    #Removes old radiobuttons
-    # for widget in plt.gcf().axes:
-    #     if isinstance(widget, RadioButtons):
-    #         widget.remove()
-    axcolor = 'green'
-    rax = plt.axes([0.05, 0.4, 0.24, 0.24],facecolor=axcolor)
-    print(day_unique_exercises)
-    exerciseRadioBtn = RadioButtons(rax,(day_unique_exercises), active=0)
-    exerciseRadioBtn.on_clicked(update_exercise)
+
+    #Raises ValueError if there is no exercises in that specific day
+    if len(day_unique_exercises) == 0:
+        raise ValueError("Error")
+    
+    # Initializes new set of exes in the figure
+    rax = plt.axes([0, 0.4, 0.24, 0.24], facecolor='Grey')
+
+    current_radio_buttons = RadioButtons(rax, day_unique_exercises, active=0)
+    current_radio_buttons.on_clicked(lambda label: update_exercise(label, unique_days[index]))
+    ax.set_title(unique_days[index])
+
+    #Updates the first plot that is shown
+    update_exercise(day_unique_exercises[0],unique_days[index])
     plt.draw()
 
-
+#Functions for day navigation buttons
 def next(event):
     if current_day_index[0] < len(unique_days) - 1:
         current_day_index[0] += 1
     update_day(current_day_index[0])
-
 def prev(event):
     if current_day_index[0] > 0:
         current_day_index[0] -= 1
     update_day(current_day_index[0])
-
 axprev = plt.axes([0.1, 0.05, 0.2, 0.075])
 axnext = plt.axes([0.7, 0.05, 0.2, 0.075])
-bprev = Button(axprev, 'Previous', hovercolor="r")
-bnext = Button(axnext, 'Next', hovercolor="g")
+bprev = Button(axprev, 'Previous', color="grey", hovercolor="r")
+bnext = Button(axnext, 'Next',color="grey", hovercolor="g")
 bprev.on_clicked(prev)
 bnext.on_clicked(next)
 
-# Näytä ensimmäinen kuvaaja
+# Updates the figure
 update_day(current_day_index[0])
-
 plt.show()
