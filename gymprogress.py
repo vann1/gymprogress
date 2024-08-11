@@ -114,26 +114,28 @@ plt.subplots_adjust(bottom=0.2, left=0.3)
 current_day_index = [0]
 
 
-def update_exercise(exercise):
-    print("AWSDASD")
-
+def update_exercise(label):
+    print(label)
+    exercise_df = df[df["Workouts"] == label]
+    ax.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=label)
+    plt.draw()
     
 
 def update_day(index):
+
     keys = list(day_dfs.keys())
     ax.clear()
     day = day_dfs[keys[index]]
     day_unique_exercises = day["Workouts"].unique()
-
     #Removes old radiobuttons
-    for widget in plt.gcf().axes:
-        if isinstance(widget, RadioButtons):
-            widget.remove()
-
-    rax = plt.axes([0.05, 0.4, 0.24, 0.24])
-    exerciseRadioBtn = RadioButtons(rax,labels=(day_unique_exercises), active=0)
-
-    exerciseRadioBtn.on_clicked(lambda day_unique_exercises: update_exercise(day_unique_exercises))
+    # for widget in plt.gcf().axes:
+    #     if isinstance(widget, RadioButtons):
+    #         widget.remove()
+    axcolor = 'green'
+    rax = plt.axes([0.05, 0.4, 0.24, 0.24],facecolor=axcolor)
+    print(day_unique_exercises)
+    exerciseRadioBtn = RadioButtons(rax,(day_unique_exercises), active=0)
+    exerciseRadioBtn.on_clicked(update_exercise)
     plt.draw()
 
 
