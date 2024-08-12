@@ -126,24 +126,17 @@ current_radio_buttons = None
 
 def update_day(index):
     global current_radio_buttons
-    #List of day_dfs dictionary keys
+
     keys = list(day_dfs.keys())
-    #Clears axes
+
     ax.clear()
 
     #Initialize a dataframe that contains all exercises for that specific day
     day = day_dfs[keys[index]]
-
     #List of all specific exercises from that specific day
     day_unique_exercises = day["Workouts"].unique()
-
-    #Raises ValueError if there is no exercises in that specific day
-    if len(day_unique_exercises) == 0:
-        raise ValueError("Error")
-    
     # Initializes new set of exes in the figure
     rax = plt.axes([0, 0.4, 0.24, 0.24], facecolor='Grey')
-
     current_radio_buttons = RadioButtons(rax, day_unique_exercises, active=0)
     current_radio_buttons.on_clicked(lambda label: update_exercise(label, unique_days[index]))
     ax.set_title(unique_days[index])
