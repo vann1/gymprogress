@@ -33,6 +33,7 @@ df["Date"] = df["Date"].apply(lambda x: pd.to_datetime(str(x) + ".2024", format=
 
 current_date = None
 
+plt.style.use('bmh')
 
 # Fills nulls with recent date
 for index, row in df.iterrows():
@@ -48,6 +49,7 @@ def contains_semicolon(cell):
     return ';' in str(cell)
 #Filtered list
 filtered_cells = df.applymap(contains_semicolon)
+
 #splits singlearm work in two and sums it
 for index, row in df.iterrows():
     for col in df.columns:
@@ -66,16 +68,21 @@ df['W2Set3'] = pd.to_numeric(df['W2Set3'], errors='coerce')
 df['Weight'] = pd.to_numeric(df['Weight'], errors='coerce')
 df['Weight2'] = pd.to_numeric(df['Weight2'], errors='coerce')
 
-#Counts total tonnage for each set
+# Calculates Set1 and Set2 tonnage. If Set2 is Na, calculate tonnage from weight2 and weight2 Set1.
 df['Tonnage1'] = df['Weight'] * df['Set1']
 df['Tonnage2'] = df['Weight'] * df['Set2']
-df['Tonnage3'] = df['Weight'] * df['Set3']
-df['Tonnage4'] = df['Weight2'] * df['W2Set1']
-df['Tonnage5'] = df['Weight2'] * df['W2Set2']
-df['Tonnage5'] = df['Weight2'] * df['W2Set3']
+df.loc[df['Set2'].isna(), 'Tonnage2'] = df['Weight2'] * df['W2Set1']
+
+#Counts total tonnage for each set excluding third set
+# df['Tonnage3'] = df['Weight'] * df['Set3']
+# df['Tonnage4'] = df['Weight2'] * df['W2Set1']
+# df['Tonnage5'] = df['Weight2'] * df['W2Set2']
+# df['Tonnage6'] = df['Weight2'] * df['W2Set3']
 
 #Sums up all set's tonnages
-df['Total Tonnage'] = df[['Tonnage1', 'Tonnage2', 'Tonnage3', 'Tonnage4', 'Tonnage5']].sum(axis=1)
+df['Total Tonnage'] = df[['Tonnage1', 'Tonnage2']].sum(axis=1)
+
+# df[df["Workouts"].str.contains(r'\w+\(\w+\)')]["Total Tonnage"]
 
 #Filters all workouts column values except workout day names
 filtered_df = df[~df['Workouts'].str.contains(r'\w+\(\w+\)', na=False)]
@@ -87,9 +94,6 @@ unique_exercises = unique_exercises[unique_exercises != '']
 
 #Filters all different cells from workouts column that matches the regular expression \w+\(\w+\) which are the unique days.
 unique_days = df[df['Workouts'].str.contains(r'\w+\(\w+\)')]['Workouts'].unique()
-
-#Diagram style
-# plt.style.use('fivethirtyeight')
 
 current_day = None
 
@@ -106,6 +110,7 @@ for index, row in df.iterrows():
     if current_day:
         day_dfs[current_day] = pd.concat([day_dfs[current_day], pd.DataFrame([row])], ignore_index=True)
         day_dfs[current_day] = day_dfs[current_day][~day_dfs[current_day]["Workouts"].str.contains(r'\w+\(\w+\)', na=False)]
+
 #Creates subplots for different days
 fig, ax = plt.subplots(figsize=(10, 6))
 plt.subplots_adjust(bottom=0.2, left=0.3)
@@ -128,9 +133,10 @@ def update_day(index):
     global current_radio_buttons
 
     keys = list(day_dfs.keys())
-
-    ax.clear()
-
+    # Clears radiobuttons and their axes
+    if current_radio_buttons is not None:
+        current_radio_buttons.ax.clear()
+        current_radio_buttons.ax.remove()
     #Initialize a dataframe that contains all exercises for that specific day
     day = day_dfs[keys[index]]
     #List of all specific exercises from that specific day
@@ -163,4 +169,5 @@ bnext.on_clicked(next)
 
 # Updates the figure
 update_day(current_day_index[0])
+
 plt.show()
