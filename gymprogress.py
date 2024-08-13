@@ -122,6 +122,10 @@ def update_exercise(label, current_day_title):
     ax.clear()
     ax.set_title(current_day_title)
     exercise_df = df[df["Workouts"] == label]
+
+    # Gets rid off rows that has zero total tonnage
+    exercise_df = exercise_df[exercise_df["Total Tonnage"] != 0.0]
+
     ax.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=label)
     ax.xaxis.set_major_locator(plt.MaxNLocator(5))
     plt.draw()
