@@ -112,18 +112,18 @@ for index, row in df.iterrows():
         day_dfs[current_day] = day_dfs[current_day][~day_dfs[current_day]["Workouts"].str.contains(r'\w+\(\w+\)', na=False)]
 
 #Creates subplots for different days
-fig, ax = plt.subplots(figsize=(10, 6))
-plt.subplots_adjust(bottom=0.2, left=0.3)
+fig, ax = plt.subplots(figsize=(12, 8))
+plt.subplots_adjust(bottom=0.3)
 
 # Muuttuja aktiiviselle kuvaajalle
 current_day_index = [0]
 
-def update_exercise(label, current_day_title):
+def update_exercise(label, current_day_title, rax):
     global original_labels
     ax.clear()
     ax.set_title(current_day_title)
-    label = original_labels[label]
-    exercise_df = df[df["Workouts"] == label]
+    original_label = original_labels[label]
+    exercise_df = df[df["Workouts"] == original_label]
 
     # Gets rid off rows that has zero total tonnage
     exercise_df = exercise_df[exercise_df["Total Tonnage"] != 0.0]
@@ -133,6 +133,7 @@ def update_exercise(label, current_day_title):
     ax.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=label, zorder=2)
     ax.set_xlabel("Date")
     ax.set_ylabel("Progress(Tonnage)")
+    ax.legend()
     ax.xaxis.set_major_locator(plt.MaxNLocator(5))
     plt.draw()
 
@@ -155,13 +156,13 @@ def update_day(index):
     original_labels = {exercise.split("[")[0]: exercise for exercise in day_unique_exercises}
 
     # Initializes new set of exes in the figure
-    rax = plt.axes([0.1, 0.1, 0.2, 0.3])
+    rax = plt.axes([0.12, 0.05, 0.24, 0.2])
     current_radio_buttons = RadioButtons(rax, list(original_labels.keys()), active=0)
-    current_radio_buttons.on_clicked(lambda label: update_exercise(label, unique_days[index]))
+    current_radio_buttons.on_clicked(lambda label: update_exercise(label, unique_days[index], rax))
     ax.set_title(unique_days[index])
 
     #Updates the first plot that is shown
-    update_exercise(list(original_labels.keys())[0] ,unique_days[index])
+    update_exercise(list(original_labels.keys())[0] ,unique_days[index], rax)
     plt.draw()
 
 #Functions for day navigation buttons
@@ -173,8 +174,8 @@ def prev(event):
     if current_day_index[0] > 0:
         current_day_index[0] -= 1
     update_day(current_day_index[0])
-axprev = plt.axes([0.1, 0.05, 0.2, 0.075])
-axnext = plt.axes([0.7, 0.05, 0.2, 0.075])
+axprev = plt.axes([0.4, 0.05, 0.1, 0.075])
+axnext = plt.axes([0.7, 0.05, 0.1, 0.075])
 bprev = Button(axprev, 'Previous', hovercolor="r")
 bnext = Button(axnext, 'Next', hovercolor="g")
 bprev.on_clicked(prev)
