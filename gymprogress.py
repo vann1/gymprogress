@@ -129,7 +129,7 @@ def update_exercise(label, current_day_title, rax):
     exercise_df = exercise_df[exercise_df["Total Tonnage"] != 0.0]
     highest_totaltonnage_index = exercise_df["Total Tonnage"].idxmax()
     highest_totaltonnage = exercise_df.loc[highest_totaltonnage_index]
-    ax.scatter(highest_totaltonnage["Date"], highest_totaltonnage["Total Tonnage"], marker="*", color="gold",s=100, zorder=3)
+    ax.scatter(highest_totaltonnage["Date"], highest_totaltonnage["Total Tonnage"], marker="*", color="orange",s=80, zorder=3)
     ax.plot(exercise_df["Date"], exercise_df["Total Tonnage"], label=label, zorder=2)
     ax.set_xlabel("Date")
     ax.set_ylabel("Progress(Tonnage)")
