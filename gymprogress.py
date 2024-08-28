@@ -174,6 +174,7 @@ def prev(event):
     if current_day_index[0] > 0:
         current_day_index[0] -= 1
     update_day(current_day_index[0])
+    
 axprev = plt.axes([0.4, 0.05, 0.1, 0.075])
 axnext = plt.axes([0.7, 0.05, 0.1, 0.075])
 bprev = Button(axprev, 'Previous', hovercolor="r")
