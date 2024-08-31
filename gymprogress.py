@@ -73,12 +73,6 @@ df['Tonnage1'] = df['Weight'] * df['Set1']
 df['Tonnage2'] = df['Weight'] * df['Set2']
 df.loc[df['Set2'].isna(), 'Tonnage2'] = df['Weight2'] * df['W2Set1']
 
-#Counts total tonnage for each set excluding third set
-# df['Tonnage3'] = df['Weight'] * df['Set3']
-# df['Tonnage4'] = df['Weight2'] * df['W2Set1']
-# df['Tonnage5'] = df['Weight2'] * df['W2Set2']
-# df['Tonnage6'] = df['Weight2'] * df['W2Set3']
-
 #Sums up all set's tonnages
 df['Total Tonnage'] = df[['Tonnage1', 'Tonnage2']].sum(axis=1)
 
